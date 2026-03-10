@@ -4,14 +4,15 @@ LiquidCrystal lcd(13,12,11,10,9,8);
 
 const int buzzer_pin = 2;
 
-const int action_button_pin = 3;
-const int select_l_button_pin = 4;
-const int select_r_button_pin = 5;
+const int a_button_pin = 3;
+const int b_button_pin = 4;
+const int c_button_pin = 5;
 
 int tick = 0;
 
 int jump = 0;
 int player_row = 1;
+int score = 0;
 
 int obstacle_row = 1;
 int obstacle_column = 15;
@@ -32,9 +33,9 @@ byte player_states[2][8] = {
 
 void setup() {
   pinMode(buzzer_pin, OUTPUT);
-  pinMode(action_button_pin, INPUT);
-  pinMode(select_l_button_pin, INPUT);
-  pinMode(select_r_button_pin, INPUT);
+  pinMode(a_button_pin, INPUT);
+  pinMode(b_button_pin, INPUT);
+  pinMode(c_button_pin, INPUT);
 
   lcd.begin(16,2);
   lcd.clear();
@@ -50,14 +51,26 @@ void setup() {
 void loop() {
   tick += 1;
   if (!alive){
+    lcd.clear();
+
     lcd.home();
-    lcd.print("You Died!");
-    return;
+    lcd.print("Game Over!");
+    lcd.setCursor(0, 1);
+    delay(500);
+    lcd.print("Score: ");
+    lcd.print(score);
+    while (true){
+      if (digitalRead(a_button_pin) == HIGH){
+        alive = true;
+        score = 0;
+        break;
+      }
+    }
   }
 
   //player logic
   if (!jump){
-    if (digitalRead(action_button_pin) == HIGH){
+    if (digitalRead(a_button_pin) == HIGH){
       jump = 10;
     }
   } 
@@ -77,8 +90,12 @@ void loop() {
   obstacle_column--;
 
   //game logic
-  if ((player_row == obstacle_row) && (obstacle_column == 1)){
-    alive = false;
+  if (obstacle_column == 1){
+    if (player_row == obstacle_row){
+      alive = false;
+    }else{
+      score++;
+    }
   }
 
   //clearing sky
@@ -117,5 +134,5 @@ void loop() {
     delay(150);
   }
 
-  delay(200);
+  delay(200 - score);
 }
