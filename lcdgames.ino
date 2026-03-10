@@ -7,7 +7,9 @@ const int b_button_pin = 4;
 const int c_button_pin = 5;
 
 int menu_index = 0;
-int interface = 0; //0 -> menu; 1 -> game selection; 2 -> settings; 
+int interface = 0;
+int sound_setting = 1;
+int settings_index = 0;
 
 void setup() {
   pinMode(buzzer_pin, OUTPUT);
@@ -19,8 +21,77 @@ void setup() {
   lcd.clear();
 }
 
+void play_tone(int pin, int frequency, int duration){
+  if (sound_setting){
+    tone(pin, frequency, duration);
+  }
+  return;
+}
 
-void scroller(){
+void button_destick(int pin) {
+  play_tone(buzzer_pin, 2000, 20);
+  delay(20);
+  play_tone(buzzer_pin, 1200, 30);
+  while(digitalRead(pin) == HIGH);
+}
+
+void settings_menu() {
+  lcd.clear();
+  while (true){
+    lcd.setCursor(0, 0);
+    if (settings_index == 0) {
+      lcd.print("> Sound: ");
+      if (sound_setting == 1) {
+        lcd.print("On ");
+      } else {
+        lcd.print("Off");
+      }
+    } else {
+      lcd.print("  Sound: ");
+      if (sound_setting == 1) {
+        lcd.print("On ");
+      } else {
+        lcd.print("Off");
+      }
+    }
+
+    lcd.setCursor(0, 1);
+    if (settings_index == 1) {
+      lcd.print("> Return");
+    } else {
+      lcd.print("  Return");
+    }
+
+    if (digitalRead(a_button_pin) == HIGH) {
+      settings_index = (settings_index == 0) ? 1 : settings_index - 1;
+      button_destick(a_button_pin);
+    }
+
+    if (digitalRead(b_button_pin) == HIGH) {
+      settings_index = (settings_index == 1) ? 0 : settings_index + 1;
+      button_destick(b_button_pin);
+    }
+
+    if (digitalRead(c_button_pin) == HIGH) {
+      if (settings_index == 0) {
+        sound_setting = !sound_setting;
+        if (sound_setting) {
+          lcd.setCursor(8, 0);
+          lcd.print("On ");
+        } else {
+          lcd.setCursor(8, 0);
+          lcd.print("Off");
+        }
+      } else if (settings_index == 1) {
+        interface = 0;
+        return;
+      }
+      button_destick(c_button_pin);
+    }
+  }
+}
+
+void game1(){
   int tick = 0;
 
   int jump = 0;
@@ -57,14 +128,14 @@ void scroller(){
     //player logic
     if (!jump){
       if (digitalRead(a_button_pin) == HIGH){
-        jump = 10;
+        jump = 9;
       }
     } 
     if (jump){
       jump--;
     }
 
-    player_row = int((jump == 0) || (jump == 1) || (jump == 9));
+    player_row = int((jump == 0) || (jump == 1) || (jump == 8));
 
     //obstacle logic
     if (obstacle_column <= 0){
@@ -97,15 +168,15 @@ void scroller(){
 
     //drawing player
     lcd.setCursor(1, player_row);
-    lcd.write(byte(6 + int((jump==1) || (jump>=4 && jump<=7) || (jump==9))));
+    lcd.write(byte(6 + int((jump==1) || (jump>=4 && jump<=6) || (jump==8))));
 
     //drawing obstacle
     lcd.setCursor(obstacle_column, obstacle_row);
     lcd.write(byte(2 + obstacle_type));
 
     //sfx
-    if (jump >= 8){
-      tone(buzzer_pin, 1000 + 200 * (9 - jump), 200);
+    if (jump >= 7){
+      play_tone(buzzer_pin, 1000 + 200 * (8 - jump), 200);
     }  
 
     tick += 1;
@@ -116,28 +187,28 @@ void scroller(){
   lcd.clear();
   lcd.home();
   lcd.print("Game Over!");
-  tone(buzzer_pin, 1000, 80);
+  play_tone(buzzer_pin, 1000, 80);
   delay(80);
-  tone(buzzer_pin, 800, 80);
+  play_tone(buzzer_pin, 800, 80);
   delay(80);
-  tone(buzzer_pin, 600, 80);
+  play_tone(buzzer_pin, 600, 80);
   delay(80);
-  tone(buzzer_pin, 400, 120);
+  play_tone(buzzer_pin, 400, 120);
   delay(120);
-  tone(buzzer_pin, 300, 150);
+  play_tone(buzzer_pin, 300, 150);
   delay(150);
   lcd.setCursor(0, 1);
   lcd.print("Score: ");
   lcd.print(score);
 
-  //wait for buttons to return to menu or restart
   while (true){
     if (digitalRead(a_button_pin) == HIGH){
-      return scroller(); // restart game
+      return game1();
+      lcd.clear();
     }
     if (digitalRead(b_button_pin) == HIGH){
       lcd.clear();
-      return; // go back to menu
+      return;
     }
   }
 }
@@ -157,45 +228,37 @@ void loop() {
 
   if (digitalRead(a_button_pin) == HIGH){
     menu_index--;
-    while(digitalRead(a_button_pin) == HIGH);
+    button_destick(a_button_pin);
   }
   if (digitalRead(c_button_pin) == HIGH){
     menu_index++;
-     while(digitalRead(c_button_pin) == HIGH);
+    button_destick(c_button_pin);
   }
+  menu_index = constrain(menu_index, 0, 1);
 
   if (interface == 0){
     if (menu_index == 0){
-      lcd.clear();
-      lcd.setCursor(4, 0);
-      lcd.print("Games ");
+      lcd.home();
+      lcd.print("    JUMP! ");
       lcd.write(byte(0));
+      lcd.print("     ");
       if (digitalRead(b_button_pin) == HIGH){
-        interface = 1;
-        while(digitalRead(b_button_pin) == HIGH){
-          continue;
-        };
+        button_destick(b_button_pin);
+        game1();
+        lcd.clear();
       }
 
     }else if(menu_index == 1){
-      lcd.clear();
-      lcd.setCursor(3, 0);
-      lcd.print("Settings ");
+      lcd.home();
+      lcd.print("   Settings ");
       lcd.write(byte(1));
+      lcd.print("   ");
       if (digitalRead(b_button_pin) == HIGH){
-        interface = 2;
-        while(digitalRead(b_button_pin) == HIGH){
-          continue;
-        };
+        button_destick(b_button_pin);
+        settings_menu();
+        lcd.clear();
       }
-
     }
-
-  }else if (interface == 1){
-    scroller();
-  }
-  else if (interface == 2){
-  }
 
   lcd.setCursor(0, 1);
   lcd.write(byte(3));
@@ -205,4 +268,5 @@ void loop() {
   lcd.write(byte(4));
 
   delay(100);
+  }
 }
