@@ -155,33 +155,54 @@ void loop() {
   lcd.createChar(3, left_icon);
   lcd.createChar(4, right_icon);
 
+  if (digitalRead(a_button_pin) == HIGH){
+    menu_index--;
+    while(digitalRead(a_button_pin) == HIGH);
+  }
+  if (digitalRead(c_button_pin) == HIGH){
+    menu_index++;
+     while(digitalRead(c_button_pin) == HIGH);
+  }
+
   if (interface == 0){
     if (menu_index == 0){
+      lcd.clear();
       lcd.setCursor(4, 0);
       lcd.print("Games ");
       lcd.write(byte(0));
-      lcd.setCursor(0, 1);
-      lcd.write(byte(3));
-      lcd.setCursor(7, 1);
-      lcd.write(byte(2));
-      lcd.setCursor(15, 1);
-      lcd.write(byte(4));
-
-      if (digitalRead(a_button_pin) == HIGH){
-        menu_index--;
-        while(digitalRead(a_button_pin) == HIGH);
-      }
       if (digitalRead(b_button_pin) == HIGH){
-        scroller();
+        interface = 1;
         while(digitalRead(b_button_pin) == HIGH){
           continue;
         };
       }
-      if (digitalRead(c_button_pin) == HIGH){
-        menu_index++;
-         while(digitalRead(c_button_pin) == HIGH);
+
+    }else if(menu_index == 1){
+      lcd.clear();
+      lcd.setCursor(3, 0);
+      lcd.print("Settings ");
+      lcd.write(byte(1));
+      if (digitalRead(b_button_pin) == HIGH){
+        interface = 2;
+        while(digitalRead(b_button_pin) == HIGH){
+          continue;
+        };
       }
+
     }
+
+  }else if (interface == 1){
+    scroller();
   }
+  else if (interface == 2){
+  }
+
+  lcd.setCursor(0, 1);
+  lcd.write(byte(3));
+  lcd.setCursor(7, 1);
+  lcd.write(byte(2));
+  lcd.setCursor(15, 1);
+  lcd.write(byte(4));
+
   delay(100);
 }
