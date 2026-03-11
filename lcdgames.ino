@@ -19,6 +19,8 @@ void setup() {
 
   lcd.begin(16,2);
   lcd.clear();
+
+  randomSeed(analogRead(A0));
 }
 
 void play_tone(int pin, int frequency, int duration){
@@ -63,30 +65,30 @@ void settings_menu() {
     }
 
     if (digitalRead(a_button_pin) == HIGH) {
-      settings_index = (settings_index == 0) ? 1 : settings_index - 1;
       button_destick(a_button_pin);
+      settings_index = (settings_index + 1) % 2;
     }
 
     if (digitalRead(b_button_pin) == HIGH) {
-      settings_index = (settings_index == 1) ? 0 : settings_index + 1;
       button_destick(b_button_pin);
-    }
-
-    if (digitalRead(c_button_pin) == HIGH) {
       if (settings_index == 0) {
         sound_setting = !sound_setting;
         if (sound_setting) {
           lcd.setCursor(8, 0);
-          lcd.print("On ");
+          lcd.print(" On ");
         } else {
           lcd.setCursor(8, 0);
-          lcd.print("Off");
+          lcd.print(" Off");
         }
       } else if (settings_index == 1) {
         interface = 0;
         return;
       }
+    }
+
+    if (digitalRead(c_button_pin) == HIGH) {
       button_destick(c_button_pin);
+      settings_index = (settings_index == 1) ? 0 : settings_index + 1;
     }
   }
 }
@@ -139,7 +141,7 @@ void game1(){
 
     //obstacle logic
     if (obstacle_column <= 0){
-      obstacle_row = analogRead(A0) % 2;
+      obstacle_row = int(bool(random(0,4)%5));
       obstacle_column = 16;
       obstacle_type = obstacle_row;
     }
@@ -180,7 +182,7 @@ void game1(){
     }  
 
     tick += 1;
-    delay(200 - score * 2);
+    delay(max(60, 200 - score * 2));
   }
 
   //game over screen
@@ -202,9 +204,10 @@ void game1(){
   lcd.print(score);
 
   while (true){
-    if (digitalRead(a_button_pin) == HIGH){
-      return game1();
+    if (digitalRead(a_button_pin) == HIGH){ 
+      game1();
       lcd.clear();
+      return;
     }
     if (digitalRead(b_button_pin) == HIGH){
       lcd.clear();
@@ -227,12 +230,12 @@ void loop() {
   lcd.createChar(4, right_icon);
 
   if (digitalRead(a_button_pin) == HIGH){
-    menu_index--;
     button_destick(a_button_pin);
+    menu_index--;
   }
   if (digitalRead(c_button_pin) == HIGH){
-    menu_index++;
     button_destick(c_button_pin);
+    menu_index++;
   }
   menu_index = constrain(menu_index, 0, 1);
 
