@@ -116,12 +116,17 @@ void game1(){
     {B00000,B00000,B00000,B00000,B00000,B01110,B01110,B01110},
     {B00000,B01110,B01110,B01110,B00000,B00000,B00000,B00000}
   };
+  byte dead_player_states[2][8] = {
+    {B00000, B00100, B01001, B10110, B01111, B10110, B01001, B00000},
+    {B00000, B00000, B10001, B00010, B01001, B10000, B01001, B00000}
+  };
 
   lcd.createChar(0, ground);
   lcd.createChar(1, grass);
   lcd.createChar(2, dart);
   lcd.createChar(3, tree);
-  
+  lcd.createChar(4, dead_player_states[0]);
+  lcd.createChar(5, dead_player_states[1]);
   lcd.createChar(6, player_states[0]);
   lcd.createChar(7, player_states[1]);
   lcd.clear();
@@ -186,9 +191,8 @@ void game1(){
   }
 
   //game over screen
-  lcd.clear();
-  lcd.home();
-  lcd.print("Game Over!");
+  lcd.setCursor(1, player_row);
+  lcd.write(byte(4));
   play_tone(buzzer_pin, 1000, 80);
   delay(80);
   play_tone(buzzer_pin, 800, 80);
@@ -199,6 +203,13 @@ void game1(){
   delay(120);
   play_tone(buzzer_pin, 300, 150);
   delay(150);
+  lcd.setCursor(1, player_row);
+  lcd.write(byte(5));
+  delay(400);
+
+  lcd.clear();
+  lcd.home();
+  lcd.print("Game Over!");
   lcd.setCursor(0, 1);
   lcd.print("Score: ");
   lcd.print(score);
@@ -208,11 +219,6 @@ void game1(){
       button_destick(a_button_pin);
       lcd.clear();
       break;
-    }
-    if (digitalRead(b_button_pin) == HIGH){
-      button_destick(b_button_pin);
-      lcd.clear();
-      return;
     }
   }
 }
