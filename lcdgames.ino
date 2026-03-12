@@ -109,8 +109,8 @@ void game1(){
   byte grass[8] = {B00000, B00000, B00000, B00000, B00000, B00000, B00100, B11011};
   byte ground[8] = {B00000, B00000, B00000, B00000, B00000, B00000, B00000, B11111};
 
-  byte spike[8] = {B00000, B00000, B00100, B00100, B01110, B01110, B11111, B11111};
-  byte arrow[8] = {B00000, B00111, B01100, B11000, B11000, B01100, B00111, B00000};
+  byte tree[8] = {B10010, B10100, B01100, B00101, B10110, B01100, B00100, B00100};
+  byte dart[8] = {B00000, B00000, B00011, B11100, B00011, B00000, B00000, B00000};
 
   byte player_states[2][8] = {
     {B00000,B00000,B00000,B00000,B00000,B01110,B01110,B01110},
@@ -119,8 +119,8 @@ void game1(){
 
   lcd.createChar(0, ground);
   lcd.createChar(1, grass);
-  lcd.createChar(2, arrow);
-  lcd.createChar(3, spike);
+  lcd.createChar(2, dart);
+  lcd.createChar(3, tree);
   
   lcd.createChar(6, player_states[0]);
   lcd.createChar(7, player_states[1]);
