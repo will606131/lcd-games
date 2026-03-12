@@ -23,11 +23,15 @@ void setup() {
   randomSeed(analogRead(A0));
 }
 
+void draw_custom_at(int column, int row, int byte_num){
+  lcd.setCursor(column, row);
+  lcd.write(byte(byte_num));
+}
+
 void play_tone(int pin, int frequency, int duration){
   if (sound_setting){
     tone(pin, frequency, duration);
   }
-  return;
 }
 
 void button_destick(int pin) {
@@ -168,18 +172,14 @@ void game1(){
 
     //drawing background
     for (int i = 0; i < 16; i++){
-      lcd.setCursor(i, 1);
-      if ((i + tick) % 4 == 0){lcd.write(byte(1));}
-      else {lcd.write(byte(0));}
+      draw_custom_at(i, 1, ((i + tick) & 3) == 0 ? byte(1) : byte(0));
     }
 
     //drawing player
-    lcd.setCursor(1, player_row);
-    lcd.write(byte(6 + int((jump==1) || (jump>=4 && jump<=6) || (jump==8))));
+    draw_custom_at(1, player_row, 6 + int((jump==1) || (jump>=4 && jump<=6) || (jump==8)));
 
     //drawing obstacle
-    lcd.setCursor(obstacle_column, obstacle_row);
-    lcd.write(byte(2 + obstacle_type));
+    draw_custom_at(obstacle_column, obstacle_row, 2 + obstacle_type);
 
     //sfx
     if (jump >= 7){
@@ -191,8 +191,7 @@ void game1(){
   }
 
   //game over screen
-  lcd.setCursor(1, player_row);
-  lcd.write(byte(4));
+  draw_custom_at(1, player_row, 4);
   play_tone(buzzer_pin, 1000, 80);
   delay(80);
   play_tone(buzzer_pin, 800, 80);
@@ -203,8 +202,7 @@ void game1(){
   delay(120);
   play_tone(buzzer_pin, 300, 150);
   delay(150);
-  lcd.setCursor(1, player_row);
-  lcd.write(byte(5));
+  draw_custom_at(1, player_row, 5);
   delay(400);
 
   lcd.clear();
@@ -270,13 +268,10 @@ void loop() {
       }
     }
 
-  lcd.setCursor(0, 1);
-  lcd.write(byte(3));
-  lcd.setCursor(7, 1);
-  lcd.write(byte(2));
-  lcd.setCursor(15, 1);
-  lcd.write(byte(4));
-
+  draw_custom_at(0, 1, 3);
+  draw_custom_at(7, 1, 2);
+  draw_custom_at(15, 1, 4);
+  
   delay(100);
   }
 }
