@@ -141,7 +141,7 @@ void game1(){
 
     //obstacle logic
     if (obstacle_column <= 0){
-      obstacle_row = int(bool(random(0,4)%5));
+      obstacle_row = random(0,100) < 75;
       obstacle_column = 16;
       obstacle_type = obstacle_row;
     }
@@ -205,11 +205,12 @@ void game1(){
 
   while (true){
     if (digitalRead(a_button_pin) == HIGH){ 
-      game1();
+      button_destick(a_button_pin);
       lcd.clear();
-      return;
+      break;
     }
     if (digitalRead(b_button_pin) == HIGH){
+      button_destick(b_button_pin);
       lcd.clear();
       return;
     }
